@@ -15,15 +15,12 @@
     </properties>
 
     <dependencies>
-        <!-- IMPORTANTE: Substitua abaixo pelo groupId, artifactId e version reais do seu Bedrock Framework -->
-        <!-- Supondo que você tenha rodado 'mvn clean install' no projeto do seu framework para colocá-lo na pasta .m2 local -->
-        <!--
+        <!-- Dependência do Bedrock Framework (via Sonatype Central) -->
         <dependency>
-            <groupId>br.com.seu-dominio</groupId>
-            <artifactId>bedrock-framework</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>io.github.ronerjr</groupId>
+            <artifactId>bedrock-core</artifactId>
+            <version>1.0.0</version>
         </dependency>
-        -->
 
         <!-- JUnit 5 (Testes de unidade) -->
         <dependency>
