@@ -1,7 +1,6 @@
 package com.example.encurtador.controller;
 
-import bedrock.http.HttpRequest;
-import bedrock.http.HttpResponse;
+import com.bedrock.core.Context;
 import com.example.encurtador.service.LinkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,15 +11,13 @@ public class RedirectControllerTest {
 
     private LinkService linkService;
     private RedirectController controller;
-    private HttpRequest request;
-    private HttpResponse response;
+    private Context ctx;
 
     @BeforeEach
     void setUp() {
         linkService = mock(LinkService.class);
         controller = new RedirectController(linkService);
-        request = mock(HttpRequest.class);
-        response = mock(HttpResponse.class);
+        ctx = mock(Context.class);
     }
 
     @Test
@@ -28,25 +25,23 @@ public class RedirectControllerTest {
         String hash = "hash12";
         String originalUrl = "https://example.com";
         
-        when(request.getPathParameter("hash")).thenReturn(hash);
+        when(ctx.pathParam("hash")).thenReturn(hash);
         when(linkService.getOriginalUrl(hash)).thenReturn(originalUrl);
 
-        controller.redirect(request, response);
+        controller.redirect(ctx);
 
-        verify(response).setStatus(302);
-        verify(response).setHeader("Location", originalUrl);
+        verify(ctx).html(contains("meta http-equiv=\"refresh\""));
     }
 
     @Test
     void shouldReturn404WhenLinkDoesNotExist() {
         String hash = "invalid";
         
-        when(request.getPathParameter("hash")).thenReturn(hash);
+        when(ctx.pathParam("hash")).thenReturn(hash);
         when(linkService.getOriginalUrl(hash)).thenReturn(null);
 
-        controller.redirect(request, response);
+        controller.redirect(ctx);
 
-        verify(response).setStatus(404);
-        verify(response).setBody("Link não encontrado");
+        verify(ctx).notFound("Link não encontrado");
     }
 }

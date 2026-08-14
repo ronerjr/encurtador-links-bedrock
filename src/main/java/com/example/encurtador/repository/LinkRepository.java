@@ -1,18 +1,17 @@
 package com.example.encurtador.repository;
 
-import bedrock.annotations.BedrockComponent;
+import com.bedrock.ioc.BedrockComponent;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 @BedrockComponent
 public class LinkRepository {
-    // ConcurrentHashMap para manter tudo na memória (Zero Dependências)
     private final Map<String, String> links = new ConcurrentHashMap<>();
     private final Map<String, Integer> metrics = new ConcurrentHashMap<>();
 
     public void save(String hash, String url) {
         links.put(hash, url);
-        metrics.put(hash, 0); // Inicializa a contagem de acessos
+        metrics.put(hash, 0);
     }
 
     public String findUrl(String hash) {

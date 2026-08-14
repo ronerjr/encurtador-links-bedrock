@@ -1,7 +1,6 @@
 package com.example.encurtador.middleware;
 
-import bedrock.http.HttpRequest;
-import bedrock.http.HttpResponse;
+import com.bedrock.core.Context;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -11,57 +10,46 @@ import static org.mockito.Mockito.*;
 public class ApiKeyMiddlewareTest {
 
     private ApiKeyMiddleware middleware;
-    private HttpRequest request;
-    private HttpResponse response;
+    private Context ctx;
 
     @BeforeEach
     void setUp() {
         middleware = new ApiKeyMiddleware();
-        request = mock(HttpRequest.class);
-        response = mock(HttpResponse.class);
+        ctx = mock(Context.class);
     }
 
     @Test
     void shouldBlockRequestToApiWithInvalidKey() {
-        when(request.getPath()).thenReturn("/api/links");
-        when(request.getHeader("X-API-KEY")).thenReturn("invalid-key");
+        when(ctx.path()).thenReturn("/api/links");
+        when(ctx.queryParam("key")).thenReturn("invalid-key");
 
-        boolean result = middleware.handle(request, response);
-
-        assertFalse(result);
-        verify(response).setStatus(401);
-        verify(response).setBody(contains("Unauthorized"));
+        assertThrows(Exception.class, () -> middleware.handle(ctx));
+        verify(ctx).badRequest(contains("Unauthorized"));
     }
 
     @Test
     void shouldBlockRequestToApiWithMissingKey() {
-        when(request.getPath()).thenReturn("/api/links");
-        when(request.getHeader("X-API-KEY")).thenReturn(null);
+        when(ctx.path()).thenReturn("/api/links");
+        when(ctx.queryParam("key")).thenReturn(null);
 
-        boolean result = middleware.handle(request, response);
-
-        assertFalse(result);
-        verify(response).setStatus(401);
+        assertThrows(Exception.class, () -> middleware.handle(ctx));
+        verify(ctx).badRequest(contains("Unauthorized"));
     }
 
     @Test
-    void shouldAllowRequestToApiWithValidKey() {
-        when(request.getPath()).thenReturn("/api/links");
-        when(request.getHeader("X-API-KEY")).thenReturn("chave-secreta-bedrock");
+    void shouldAllowRequestToApiWithValidKey() throws Exception {
+        when(ctx.path()).thenReturn("/api/links");
+        when(ctx.queryParam("key")).thenReturn("chave-secreta-bedrock");
 
-        boolean result = middleware.handle(request, response);
-
-        assertTrue(result);
-        verify(response, never()).setStatus(anyInt());
+        assertDoesNotThrow(() -> middleware.handle(ctx));
+        verify(ctx, never()).badRequest(anyString());
     }
 
     @Test
-    void shouldAllowRequestToPublicRouteWithoutKey() {
-        when(request.getPath()).thenReturn("/go/hash12");
+    void shouldAllowRequestToPublicRouteWithoutKey() throws Exception {
+        when(ctx.path()).thenReturn("/go/hash12");
 
-        boolean result = middleware.handle(request, response);
-
-        assertTrue(result);
-        verify(response, never()).setStatus(anyInt());
+        assertDoesNotThrow(() -> middleware.handle(ctx));
+        verify(ctx, never()).badRequest(anyString());
     }
 }

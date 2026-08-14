@@ -1,17 +1,17 @@
 package com.example.encurtador;
 
-import bedrock.core.BedrockApp;
+import com.bedrock.core.BedrockApp;
+import com.example.encurtador.controller.LinkController;
+import com.example.encurtador.controller.RedirectController;
 import com.example.encurtador.middleware.ApiKeyMiddleware;
 
 public class Application {
     public static void main(String[] args) {
-        BedrockApp app = new BedrockApp();
+        BedrockApp app = BedrockApp.create(8080);
         
-        // Registra o middleware de segurança globalmente
         app.before(new ApiKeyMiddleware());
-        
-        // Inicia a aplicação na porta 8080
-        app.start(8080);
+        app.bindControllers(LinkController.class, RedirectController.class);
+        app.start();
         
         System.out.println("Encurtador de Links com Bedrock rodando na porta 8080!");
     }

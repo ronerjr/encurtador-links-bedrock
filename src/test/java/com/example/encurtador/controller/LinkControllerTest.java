@@ -1,7 +1,6 @@
 package com.example.encurtador.controller;
 
-import bedrock.http.HttpRequest;
-import bedrock.http.HttpResponse;
+import com.bedrock.core.Context;
 import com.example.encurtador.service.LinkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,15 +11,13 @@ public class LinkControllerTest {
 
     private LinkService linkService;
     private LinkController controller;
-    private HttpRequest request;
-    private HttpResponse response;
+    private Context ctx;
 
     @BeforeEach
     void setUp() {
         linkService = mock(LinkService.class);
         controller = new LinkController(linkService);
-        request = mock(HttpRequest.class);
-        response = mock(HttpResponse.class);
+        ctx = mock(Context.class);
     }
 
     @Test
@@ -28,13 +25,12 @@ public class LinkControllerTest {
         String originalUrl = "https://example.com";
         String generatedHash = "hash12";
         
-        when(request.getBodyAsString()).thenReturn(originalUrl);
+        when(ctx.queryParam("url")).thenReturn(originalUrl);
         when(linkService.createShortLink(originalUrl)).thenReturn(generatedHash);
 
-        controller.create(request, response);
+        controller.create(ctx);
 
-        verify(response).setStatus(201);
-        verify(response).setBody(contains(generatedHash));
+        verify(ctx).created(contains(generatedHash));
     }
 
     @Test
@@ -42,12 +38,11 @@ public class LinkControllerTest {
         String hash = "hash12";
         int clicks = 10;
         
-        when(request.getPathParameter("hash")).thenReturn(hash);
+        when(ctx.pathParam("hash")).thenReturn(hash);
         when(linkService.getLinkMetrics(hash)).thenReturn(clicks);
 
-        controller.metrics(request, response);
+        controller.metrics(ctx);
 
-        verify(response).setStatus(200);
-        verify(response).setBody(contains("\"clicks\": 10"));
+        verify(ctx).ok(contains("\"clicks\": 10"));
     }
 }
