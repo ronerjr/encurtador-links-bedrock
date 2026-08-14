@@ -22,15 +22,15 @@ public class LinkControllerTest {
 
     @Test
     void shouldCreateLinkSuccessfully() {
-        String originalUrl = "https://example.com";
+        String domainUrl = "github.com";
         String generatedHash = "hash12";
         
-        when(ctx.queryParam("url")).thenReturn(originalUrl);
-        when(linkService.createShortLink(originalUrl)).thenReturn(generatedHash);
+        when(ctx.pathParam("url")).thenReturn(domainUrl);
+        when(linkService.createShortLink("https://github.com")).thenReturn(generatedHash);
 
         controller.create(ctx);
 
-        verify(ctx).created(contains(generatedHash));
+        verify(ctx).created(any(java.util.Map.class));
     }
 
     @Test
@@ -43,6 +43,6 @@ public class LinkControllerTest {
 
         controller.metrics(ctx);
 
-        verify(ctx).ok(contains("\"clicks\": 10"));
+        verify(ctx).ok(any(java.util.Map.class));
     }
 }

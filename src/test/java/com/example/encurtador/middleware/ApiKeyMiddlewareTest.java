@@ -19,27 +19,39 @@ public class ApiKeyMiddlewareTest {
     }
 
     @Test
-    void shouldBlockRequestToApiWithInvalidKey() {
-        when(ctx.path()).thenReturn("/api/links");
+    void shouldBlockRequestToApiWithInvalidKey() throws Exception {
+        when(ctx.path()).thenReturn("/api/links/create");
         when(ctx.queryParam("key")).thenReturn("invalid-key");
+        when(ctx.pathParam("key")).thenReturn(null);
 
-        assertThrows(Exception.class, () -> middleware.handle(ctx));
+        assertDoesNotThrow(() -> middleware.handle(ctx));
         verify(ctx).badRequest(contains("Unauthorized"));
     }
 
     @Test
-    void shouldBlockRequestToApiWithMissingKey() {
-        when(ctx.path()).thenReturn("/api/links");
+    void shouldBlockRequestToApiWithMissingKey() throws Exception {
+        when(ctx.path()).thenReturn("/api/links/create");
         when(ctx.queryParam("key")).thenReturn(null);
+        when(ctx.pathParam("key")).thenReturn(null);
 
-        assertThrows(Exception.class, () -> middleware.handle(ctx));
+        assertDoesNotThrow(() -> middleware.handle(ctx));
         verify(ctx).badRequest(contains("Unauthorized"));
     }
 
     @Test
-    void shouldAllowRequestToApiWithValidKey() throws Exception {
-        when(ctx.path()).thenReturn("/api/links");
+    void shouldAllowRequestToApiWithValidKeyInQuery() throws Exception {
+        when(ctx.path()).thenReturn("/api/links/create");
         when(ctx.queryParam("key")).thenReturn("chave-secreta-bedrock");
+
+        assertDoesNotThrow(() -> middleware.handle(ctx));
+        verify(ctx, never()).badRequest(anyString());
+    }
+    
+    @Test
+    void shouldAllowRequestToApiWithValidKeyInPath() throws Exception {
+        when(ctx.path()).thenReturn("/api/links/create/chave-secreta-bedrock/github.com");
+        when(ctx.queryParam("key")).thenReturn(null);
+        when(ctx.pathParam("key")).thenReturn("chave-secreta-bedrock");
 
         assertDoesNotThrow(() -> middleware.handle(ctx));
         verify(ctx, never()).badRequest(anyString());

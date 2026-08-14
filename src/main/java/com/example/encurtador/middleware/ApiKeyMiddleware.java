@@ -10,11 +10,16 @@ public class ApiKeyMiddleware implements Middleware {
     @Override
     public void handle(Context ctx) throws Exception {
         if (ctx.path().startsWith("/api/")) {
-            // Validando via Query Param "key" já que Context não tem getHeader
             String key = ctx.queryParam("key");
+            
+            // Suporte para o BedrockPlayground ler a chave direto da URL
+            if (key == null || key.isEmpty()) {
+                key = ctx.pathParam("key");
+            }
+
             if (key == null || !key.equals(API_KEY)) {
-                ctx.badRequest("Unauthorized - Invalid API Key in 'key' param");
-                throw new Exception("Unauthorized API Access");
+                ctx.badRequest("Unauthorized - Invalid API Key");
+                return;
             }
         }
     }
